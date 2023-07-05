@@ -15,23 +15,23 @@ async function main() {
   // console.log("CHIEN address:", chienAddress);
   // Config.setConfig(network + ".CHIEN", chienAddress);
 
-  // Faucet Deploy
+  // // Faucet Deploy
+  // console.log("deploy from address: ", deployer.address);
+  // const Faucet = await ethers.deployContract("Faucet", [
+  //   "0xE0A1F73936Fc63573Af0A47386CA1544530abFB5",
+  // ]);
+  // const FaucetAddress = await Faucet.getAddress();
+  // console.log("Faucet address:", FaucetAddress);
+  // Config.setConfig(network + ".Faucet", FaucetAddress);
+
+  // Donate Deploy
   console.log("deploy from address: ", deployer.address);
-  const Faucet = await ethers.deployContract("Faucet", [
+  const Donate = await ethers.deployContract("Donate", [
     "0xE0A1F73936Fc63573Af0A47386CA1544530abFB5",
   ]);
-  const FaucetAddress = await Faucet.getAddress();
-  console.log("Faucet address:", FaucetAddress);
-  Config.setConfig(network + ".Faucet", FaucetAddress);
-
-  // // Donate Deploy
-  // console.log("deploy from address: ", deployer.address);
-  // const Donate = await ethers.deployContract("Donate", [
-  //   "0xA80A0E9e7561f72cF4B44F567fe8C4457290f781",
-  // ]);
-  // const DonateAddress = await Donate.getAddress();
-  // console.log("Donate address:", DonateAddress);
-  // Config.setConfig(network + ".Donate", DonateAddress);
+  const DonateAddress = await Donate.getAddress();
+  console.log("Donate address:", DonateAddress);
+  Config.setConfig(network + ".Donate", DonateAddress);
 
   await Config.updateConfig();
 }

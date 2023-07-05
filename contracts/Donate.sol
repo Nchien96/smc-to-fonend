@@ -23,10 +23,9 @@ contract Donate is Ownable {
     emit Deposit (msg.sender, msg.value);
   }
 
-  function deposit(uint _amount) external {
-    require(token.balanceOf(msg.sender) >= _amount,"Insufficient account balance");
-    require(_amount>= donateAmount,"");
-    SafeERC20.safeTransferFrom(token, msg.sender, address(this), _amount*(10**18));
+  function donate() external {
+    require(token.balanceOf(msg.sender) >= donateAmount,"Insufficient account balance");
+    SafeERC20.safeTransferFrom(token, msg.sender, address(this), donateAmount);
   }
 
   function getBalance() external view returns (uint) {
