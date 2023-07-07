@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from "react";
 import { Web3 } from "web3";
 import detectEthereumProvider from "@metamask/detect-provider";
@@ -10,6 +9,10 @@ const Faucet = () => {
   const [wallet, setWallet] = useState(initialState);
   const [balance, setBalance] = useState();
   const web3 = new Web3(window.ethereum);
+  const [shouldReaload, reload] = useState(false);
+  const reloadEffect = () => {
+    reload(!shouldReaload);
+  };
 
   const faucetAbi = [
     {
@@ -780,11 +783,78 @@ const Faucet = () => {
   ];
   const chienAddress = "0xE0A1F73936Fc63573Af0A47386CA1544530abFB5";
 
+  const bsctestID = 97;
+
   useEffect(() => {
+    const refreshAccounts = (accounts) => {
+      if (accounts.length > 0) {
+        updateWallet(accounts);
+      } else {
+        setWallet(initialState);
+      }
+    };
+
+    const getCurrentChainID = async () => {
+      const currentChainID = await web3.eth.getChainId();
+      return currentChainID;
+    };
+
+    const switchNetwork = async (chainID) => {
+      const currentChainID = await web3.eth.getChainId();
+      console.log(currentChainID);
+      if (currentChainID != chainID) {
+        try {
+          await window.ethereum.request({
+            method: "wallet_switchEthereumChain",
+            params: [
+              {
+                chainId: Web3.utils.toHex(chainID),
+              },
+            ],
+          });
+        } catch (err) {
+          console.log("chien");
+          await addNetwork(bsctestNetwork);
+        }
+      }
+    };
+
+    const bsctestNetwork = {
+      chainId: Web3.utils.toHex(bsctestID),
+      chainName: "BNB Smart Chain Testnet",
+      nativeCurrency: {
+        name: "BSC TEST",
+        symbol: "tBNB",
+        decimals: 18,
+      },
+      blockExplorerUrls: ["https://testnet.bscscan.com/"],
+      rpcUrls: ["https://data-seed-prebsc-1-s3.binance.org:8545/"],
+    };
+
+    const addNetwork = async (netWork) => {
+      try {
+        await window.ethereum.request({
+          method: "wallet_addEthereumChain",
+          params: [netWork],
+        });
+      } catch (err) {
+        console.log(err.message);
+      }
+    };
+
     const getProvider = async () => {
-      const provider = await detectEthereumProvider({ silent: true });
+      const provider = await detectEthereumProvider();
       console.log(provider);
-      setHasProvider(!!provider);
+      await setHasProvider(provider);
+      await switchNetwork(bsctestID);
+      if (provider) {
+        const accounts = await window.ethereum.request({
+          method: "eth_accounts",
+        });
+
+        await refreshAccounts(accounts);
+        window.ethereum.on("accountsChanged", refreshAccounts);
+      }
     };
 
     getProvider();
@@ -807,15 +877,13 @@ const Faucet = () => {
   };
 
   useEffect(() => {
-    async function loadBalance() {
+    const loadBalance = async () => {
       const contract = await new web3.eth.Contract(donateAbi, donateAddress);
       const balance = await contract.methods.getBalance().call();
-
-      setBalance(web3.utils.fromWei(balance, "ether"));
-    }
+      await setBalance(web3.utils.fromWei(balance, "ether"));
+    };
     loadBalance();
-    console.log(balance);
-  }, [balance]);
+  }, [shouldReaload]);
 
   const faucet = async () => {
     try {
@@ -857,6 +925,7 @@ const Faucet = () => {
     } catch (err) {
       console.error(err.message);
     }
+    reloadEffect();
   };
 
   const approve = async () => {
