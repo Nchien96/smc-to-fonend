@@ -794,15 +794,10 @@ const Faucet = () => {
       }
     };
 
-    const getCurrentChainID = async () => {
-      const currentChainID = await web3.eth.getChainId();
-      return currentChainID;
-    };
-
     const switchNetwork = async (chainID) => {
       const currentChainID = await web3.eth.getChainId();
       console.log(currentChainID);
-      if (currentChainID != chainID) {
+      if (currentChainID !== chainID) {
         try {
           await window.ethereum.request({
             method: "wallet_switchEthereumChain",
@@ -912,6 +907,7 @@ const Faucet = () => {
     } catch (err) {
       console.error(err.message);
     }
+    reloadEffect();
   };
 
   const donate = async () => {
